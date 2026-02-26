@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- 📅 Month Selector -->
+<form method="GET" style="margin-bottom: 20px;">
+    <label style="font-weight: 600;">Select Month:</label>
+    <input 
+    type="month" 
+    name="month" 
+    value="{{ selected_month }}" 
+    onchange="this.form.submit()"
+    style="
+        margin-left: 10px;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        color: var(--text-main);
+        color-scheme: light dark;
+    "
+>
+
+</form>
+
+<div class="stats-grid">
+    <div class="card">
+        <p style="color: var(--text-muted); margin: 0;">Total Spending</p>
+        <h1 style="margin: 10px 0; font-size: 2.5rem;">₹{{ total }}</h1>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: start;">
+
+    <!-- 🥧 Category Chart -->
+    <div class="card">
+        <h3 style="margin-top:0;">Spending by Category</h3>
+        <div style="height: 240px; display:flex; align-items:center; justify-content:center;">
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 📈 Daily Trend Chart -->
+    <div class="card">
+        <h3 style="margin-top:0;">Daily Spending Trend</h3>
+        <div style="height: 240px;">
+            <canvas id="lineChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script>
+/* 🥧 Doughnut Chart */
+const pieCtx = document.getElementById('pieChart');
+
+new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {{ labels | safe }},
+        datasets: [{
+            data: {{ values | safe }},
+            backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+
+/* 📈 Line Chart */
+const lineCtx = document.getElementById('lineChart');
+
+new Chart(lineCtx, {
+    type: 'line',
+    data: {
+        labels: {{ day_labels | safe }},
+        datasets: [{
+            label: "Daily Spending",
+            data: {{ day_values | safe }},
+            borderColor: "#4f46e5",
+            backgroundColor: "rgba(79,70,229,0.15)",
+            fill: true,
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false }
+        },
+        scales: {
+    y: {
+        beginAtZero: true,
+        ticks: {
+            stepSize: 200   // 👈 0, 200, 400, 600, ...
+        }
+    }
+}
+
+    }
+});
+</script>
+
+{% endblock %}
